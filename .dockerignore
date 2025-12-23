@@ -1,0 +1,13 @@
+# Ignore everything in target except the built jar
+target/*
+!target/billing-backend-0.0.1-SNAPSHOT.jar
+
+# IDE and VCS
+.idea
+.vscode
+.git
+*.iml
+
+# Maven wrapper and logs
+.mvn
+*.log
