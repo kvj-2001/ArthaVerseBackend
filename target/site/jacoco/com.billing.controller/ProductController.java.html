@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ProductController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">billing-backend</a> &gt; <a href="index.source.html" class="el_package">com.billing.controller</a> &gt; <span class="el_source">ProductController.java</span></div><h1>ProductController.java</h1><pre class="source lang-java linenums">package com.billing.controller;
+
+import com.billing.dto.ProductDto;
+import com.billing.entity.UnitType;
+import com.billing.service.ProductService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.List;
+
+@RestController
+@RequestMapping(&quot;/products&quot;)
+@Tag(name = &quot;Products&quot;, description = &quot;Product management endpoints&quot;)
+<span class="nc" id="L24">public class ProductController {</span>
+    
+    @Autowired
+    private ProductService productService;
+    
+    @Operation(summary = &quot;Create a new product&quot;)
+    @PostMapping
+    public ResponseEntity&lt;ProductDto&gt; createProduct(@Valid @RequestBody ProductDto productDto) {
+<span class="nc" id="L32">        ProductDto createdProduct = productService.createProduct(productDto);</span>
+<span class="nc" id="L33">        return new ResponseEntity&lt;&gt;(createdProduct, HttpStatus.CREATED);</span>
+    }
+    
+    @Operation(summary = &quot;Update an existing product&quot;)
+    @PutMapping(&quot;/{id}&quot;)
+    public ResponseEntity&lt;ProductDto&gt; updateProduct(@PathVariable Long id, @Valid @RequestBody ProductDto productDto) {
+<span class="nc" id="L39">        ProductDto updatedProduct = productService.updateProduct(id, productDto);</span>
+<span class="nc" id="L40">        return ResponseEntity.ok(updatedProduct);</span>
+    }
+    
+    @Operation(summary = &quot;Delete a product&quot;)
+    @DeleteMapping(&quot;/{id}&quot;)
+    public ResponseEntity&lt;Void&gt; deleteProduct(@PathVariable Long id) {
+<span class="nc" id="L46">        productService.deleteProduct(id);</span>
+<span class="nc" id="L47">        return ResponseEntity.noContent().build();</span>
+    }
+    
+    @Operation(summary = &quot;Get a product by ID&quot;)
+    @GetMapping(&quot;/{id}&quot;)
+    public ResponseEntity&lt;ProductDto&gt; getProduct(@PathVariable Long id) {
+<span class="nc" id="L53">        ProductDto product = productService.getProduct(id);</span>
+<span class="nc" id="L54">        return ResponseEntity.ok(product);</span>
+    }
+    
+    @Operation(summary = &quot;Get all products with pagination&quot;)
+    @GetMapping
+    public ResponseEntity&lt;Page&lt;ProductDto&gt;&gt; getAllProducts(Pageable pageable) {
+<span class="nc" id="L60">        Page&lt;ProductDto&gt; products = productService.getAllProducts(pageable);</span>
+<span class="nc" id="L61">        return ResponseEntity.ok(products);</span>
+    }
+    
+    @Operation(summary = &quot;Search products by keyword&quot;)
+    @GetMapping(&quot;/search&quot;)
+    public ResponseEntity&lt;Page&lt;ProductDto&gt;&gt; searchProducts(@RequestParam String keyword, Pageable pageable) {
+<span class="nc" id="L67">        Page&lt;ProductDto&gt; products = productService.searchProducts(keyword, pageable);</span>
+<span class="nc" id="L68">        return ResponseEntity.ok(products);</span>
+    }
+    
+    @Operation(summary = &quot;Get products by category&quot;)
+    @GetMapping(&quot;/category/{category}&quot;)
+    public ResponseEntity&lt;List&lt;ProductDto&gt;&gt; getProductsByCategory(@PathVariable String category) {
+<span class="nc" id="L74">        List&lt;ProductDto&gt; products = productService.getProductsByCategory(category);</span>
+<span class="nc" id="L75">        return ResponseEntity.ok(products);</span>
+    }
+    
+    @Operation(summary = &quot;Get all product categories&quot;)
+    @GetMapping(&quot;/categories&quot;)
+    public ResponseEntity&lt;List&lt;String&gt;&gt; getCategories() {
+<span class="nc" id="L81">        List&lt;String&gt; categories = productService.getCategories();</span>
+<span class="nc" id="L82">        return ResponseEntity.ok(categories);</span>
+    }
+    
+    @Operation(summary = &quot;Get all unit types&quot;)
+    @GetMapping(&quot;/units&quot;)
+    public ResponseEntity&lt;List&lt;UnitType&gt;&gt; getUnitTypes() {
+<span class="nc" id="L88">        List&lt;UnitType&gt; unitTypes = Arrays.asList(UnitType.values());</span>
+<span class="nc" id="L89">        return ResponseEntity.ok(unitTypes);</span>
+    }
+    
+    @Operation(summary = &quot;Get low stock products&quot;)
+    @GetMapping(&quot;/low-stock&quot;)
+    public ResponseEntity&lt;List&lt;ProductDto&gt;&gt; getLowStockProducts() {
+<span class="nc" id="L95">        List&lt;ProductDto&gt; products = productService.getLowStockProducts();</span>
+<span class="nc" id="L96">        return ResponseEntity.ok(products);</span>
+    }
+    
+    @Operation(summary = &quot;Bulk upload products via CSV&quot;)
+    @PostMapping(&quot;/bulk-upload&quot;)
+    public ResponseEntity&lt;List&lt;ProductDto&gt;&gt; bulkUploadProducts(@RequestParam(&quot;file&quot;) MultipartFile file) throws IOException {
+<span class="nc" id="L102">        List&lt;ProductDto&gt; uploadedProducts = productService.bulkUploadProducts(file);</span>
+<span class="nc" id="L103">        return ResponseEntity.ok(uploadedProducts);</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

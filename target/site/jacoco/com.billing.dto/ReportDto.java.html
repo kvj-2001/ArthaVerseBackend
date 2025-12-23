@@ -1,0 +1,246 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ReportDto.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">billing-backend</a> &gt; <a href="index.source.html" class="el_package">com.billing.dto</a> &gt; <span class="el_source">ReportDto.java</span></div><h1>ReportDto.java</h1><pre class="source lang-java linenums">package com.billing.dto;
+
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.util.List;
+import java.util.Map;
+
+public class ReportDto {
+    
+    private String reportType;
+    private LocalDate startDate;
+    private LocalDate endDate;
+<span class="nc" id="L13">    private BigDecimal totalRevenue = BigDecimal.ZERO;</span>
+    private Map&lt;String, Object&gt; additionalData;
+    
+    // Frontend-specific fields
+    private List&lt;SalesTrendItem&gt; salesTrend;
+    private List&lt;StatusDistributionItem&gt; statusDistribution;
+    private List&lt;TopProductItem&gt; topProducts;
+    private Summary summary;
+    
+    // Constructors
+<span class="nc" id="L23">    public ReportDto() {}</span>
+    
+<span class="nc" id="L25">    public ReportDto(String reportType, LocalDate startDate, LocalDate endDate, BigDecimal totalRevenue) {</span>
+<span class="nc" id="L26">        this.reportType = reportType;</span>
+<span class="nc" id="L27">        this.startDate = startDate;</span>
+<span class="nc" id="L28">        this.endDate = endDate;</span>
+<span class="nc" id="L29">        this.totalRevenue = totalRevenue;</span>
+<span class="nc" id="L30">    }</span>
+    
+    // Getters and Setters
+    public String getReportType() {
+<span class="nc" id="L34">        return reportType;</span>
+    }
+    
+    public void setReportType(String reportType) {
+<span class="nc" id="L38">        this.reportType = reportType;</span>
+<span class="nc" id="L39">    }</span>
+    
+    public LocalDate getStartDate() {
+<span class="nc" id="L42">        return startDate;</span>
+    }
+    
+    public void setStartDate(LocalDate startDate) {
+<span class="nc" id="L46">        this.startDate = startDate;</span>
+<span class="nc" id="L47">    }</span>
+    
+    public LocalDate getEndDate() {
+<span class="nc" id="L50">        return endDate;</span>
+    }
+    
+    public void setEndDate(LocalDate endDate) {
+<span class="nc" id="L54">        this.endDate = endDate;</span>
+<span class="nc" id="L55">    }</span>
+    
+    public BigDecimal getTotalRevenue() {
+<span class="nc" id="L58">        return totalRevenue;</span>
+    }
+    
+    public void setTotalRevenue(BigDecimal totalRevenue) {
+<span class="nc" id="L62">        this.totalRevenue = totalRevenue;</span>
+<span class="nc" id="L63">    }</span>
+    
+    public Map&lt;String, Object&gt; getAdditionalData() {
+<span class="nc" id="L66">        return additionalData;</span>
+    }
+    
+    public void setAdditionalData(Map&lt;String, Object&gt; additionalData) {
+<span class="nc" id="L70">        this.additionalData = additionalData;</span>
+<span class="nc" id="L71">    }</span>
+    
+    public List&lt;SalesTrendItem&gt; getSalesTrend() {
+<span class="nc" id="L74">        return salesTrend;</span>
+    }
+    
+    public void setSalesTrend(List&lt;SalesTrendItem&gt; salesTrend) {
+<span class="nc" id="L78">        this.salesTrend = salesTrend;</span>
+<span class="nc" id="L79">    }</span>
+    
+    public List&lt;StatusDistributionItem&gt; getStatusDistribution() {
+<span class="nc" id="L82">        return statusDistribution;</span>
+    }
+    
+    public void setStatusDistribution(List&lt;StatusDistributionItem&gt; statusDistribution) {
+<span class="nc" id="L86">        this.statusDistribution = statusDistribution;</span>
+<span class="nc" id="L87">    }</span>
+    
+    public List&lt;TopProductItem&gt; getTopProducts() {
+<span class="nc" id="L90">        return topProducts;</span>
+    }
+
+    public void setTopProducts(List&lt;TopProductItem&gt; topProducts) {
+<span class="nc" id="L94">        this.topProducts = topProducts;</span>
+<span class="nc" id="L95">    }</span>
+
+    public Summary getSummary() {
+<span class="nc" id="L98">        return summary;</span>
+    }
+
+    public void setSummary(Summary summary) {
+<span class="nc" id="L102">        this.summary = summary;</span>
+<span class="nc" id="L103">    }    // Inner classes for structured data</span>
+    public static class SalesTrendItem {
+        private String date;
+        private BigDecimal amount;
+        
+<span class="nc" id="L108">        public SalesTrendItem() {}</span>
+        
+<span class="nc" id="L110">        public SalesTrendItem(String date, BigDecimal amount) {</span>
+<span class="nc" id="L111">            this.date = date;</span>
+<span class="nc" id="L112">            this.amount = amount;</span>
+<span class="nc" id="L113">        }</span>
+        
+        public String getDate() {
+<span class="nc" id="L116">            return date;</span>
+        }
+        
+        public void setDate(String date) {
+<span class="nc" id="L120">            this.date = date;</span>
+<span class="nc" id="L121">        }</span>
+        
+        public BigDecimal getAmount() {
+<span class="nc" id="L124">            return amount;</span>
+        }
+        
+        public void setAmount(BigDecimal amount) {
+<span class="nc" id="L128">            this.amount = amount;</span>
+<span class="nc" id="L129">        }</span>
+    }
+    
+    public static class StatusDistributionItem {
+        private String status;
+        private Long count;
+        
+<span class="nc" id="L136">        public StatusDistributionItem() {}</span>
+        
+<span class="nc" id="L138">        public StatusDistributionItem(String status, Long count) {</span>
+<span class="nc" id="L139">            this.status = status;</span>
+<span class="nc" id="L140">            this.count = count;</span>
+<span class="nc" id="L141">        }</span>
+        
+        public String getStatus() {
+<span class="nc" id="L144">            return status;</span>
+        }
+        
+        public void setStatus(String status) {
+<span class="nc" id="L148">            this.status = status;</span>
+<span class="nc" id="L149">        }</span>
+        
+        public Long getCount() {
+<span class="nc" id="L152">            return count;</span>
+        }
+        
+        public void setCount(Long count) {
+<span class="nc" id="L156">            this.count = count;</span>
+<span class="nc" id="L157">        }</span>
+    }
+    
+    public static class TopProductItem {
+        private String productName;
+        private BigDecimal revenue;
+        private Long quantity;
+        
+<span class="nc" id="L165">        public TopProductItem() {}</span>
+        
+<span class="nc" id="L167">        public TopProductItem(String productName, BigDecimal revenue, Long quantity) {</span>
+<span class="nc" id="L168">            this.productName = productName;</span>
+<span class="nc" id="L169">            this.revenue = revenue;</span>
+<span class="nc" id="L170">            this.quantity = quantity;</span>
+<span class="nc" id="L171">        }</span>
+        
+        public String getProductName() {
+<span class="nc" id="L174">            return productName;</span>
+        }
+        
+        public void setProductName(String productName) {
+<span class="nc" id="L178">            this.productName = productName;</span>
+<span class="nc" id="L179">        }</span>
+        
+        public BigDecimal getRevenue() {
+<span class="nc" id="L182">            return revenue;</span>
+        }
+        
+        public void setRevenue(BigDecimal revenue) {
+<span class="nc" id="L186">            this.revenue = revenue;</span>
+<span class="nc" id="L187">        }</span>
+        
+        public Long getQuantity() {
+<span class="nc" id="L190">            return quantity;</span>
+        }
+        
+        public void setQuantity(Long quantity) {
+<span class="nc" id="L194">            this.quantity = quantity;</span>
+<span class="nc" id="L195">        }</span>
+    }
+    
+    public static class Summary {
+        private Long totalInvoices;
+        private BigDecimal totalRevenue;
+        private BigDecimal averageInvoiceValue;
+        private Long pendingInvoices;
+        
+<span class="nc" id="L204">        public Summary() {}</span>
+        
+<span class="nc" id="L206">        public Summary(Long totalInvoices, BigDecimal totalRevenue, BigDecimal averageInvoiceValue, Long pendingInvoices) {</span>
+<span class="nc" id="L207">            this.totalInvoices = totalInvoices;</span>
+<span class="nc" id="L208">            this.totalRevenue = totalRevenue;</span>
+<span class="nc" id="L209">            this.averageInvoiceValue = averageInvoiceValue;</span>
+<span class="nc" id="L210">            this.pendingInvoices = pendingInvoices;</span>
+<span class="nc" id="L211">        }</span>
+        
+        public Long getTotalInvoices() {
+<span class="nc" id="L214">            return totalInvoices;</span>
+        }
+        
+        public void setTotalInvoices(Long totalInvoices) {
+<span class="nc" id="L218">            this.totalInvoices = totalInvoices;</span>
+<span class="nc" id="L219">        }</span>
+        
+        public BigDecimal getTotalRevenue() {
+<span class="nc" id="L222">            return totalRevenue;</span>
+        }
+        
+        public void setTotalRevenue(BigDecimal totalRevenue) {
+<span class="nc" id="L226">            this.totalRevenue = totalRevenue;</span>
+<span class="nc" id="L227">        }</span>
+        
+        public BigDecimal getAverageInvoiceValue() {
+<span class="nc" id="L230">            return averageInvoiceValue;</span>
+        }
+        
+        public void setAverageInvoiceValue(BigDecimal averageInvoiceValue) {
+<span class="nc" id="L234">            this.averageInvoiceValue = averageInvoiceValue;</span>
+<span class="nc" id="L235">        }</span>
+        
+        public Long getPendingInvoices() {
+<span class="nc" id="L238">            return pendingInvoices;</span>
+        }
+        
+        public void setPendingInvoices(Long pendingInvoices) {
+<span class="nc" id="L242">            this.pendingInvoices = pendingInvoices;</span>
+<span class="nc" id="L243">        }</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>JwtTokenProvider.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">billing-backend</a> &gt; <a href="index.source.html" class="el_package">com.billing.security</a> &gt; <span class="el_source">JwtTokenProvider.java</span></div><h1>JwtTokenProvider.java</h1><pre class="source lang-java linenums">package com.billing.security;
+
+import io.jsonwebtoken.*;
+import io.jsonwebtoken.security.Keys;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
+
+import javax.crypto.SecretKey;
+import java.util.Date;
+
+@Component
+<span class="nc" id="L14">public class JwtTokenProvider {</span>
+    
+<span class="nc" id="L16">    private static final Logger logger = LoggerFactory.getLogger(JwtTokenProvider.class);</span>
+    
+    @Value(&quot;${jwt.secret}&quot;)
+    private String jwtSecret;
+    
+    @Value(&quot;${jwt.expiration}&quot;)
+    private int jwtExpirationInMs;
+    
+    private SecretKey getSigningKey() {
+<span class="nc" id="L25">        byte[] keyBytes = jwtSecret.getBytes();</span>
+<span class="nc" id="L26">        return Keys.hmacShaKeyFor(keyBytes);</span>
+    }
+    
+    public String generateToken(String username) {
+<span class="nc" id="L30">        Date expiryDate = new Date(System.currentTimeMillis() + jwtExpirationInMs);</span>
+        
+<span class="nc" id="L32">        return Jwts.builder()</span>
+<span class="nc" id="L33">                .setSubject(username)</span>
+<span class="nc" id="L34">                .setIssuedAt(new Date())</span>
+<span class="nc" id="L35">                .setExpiration(expiryDate)</span>
+<span class="nc" id="L36">                .signWith(getSigningKey(), SignatureAlgorithm.HS256)</span>
+<span class="nc" id="L37">                .compact();</span>
+    }
+    
+    public String getUsernameFromToken(String token) {
+<span class="nc" id="L41">        Claims claims = Jwts.parserBuilder()</span>
+<span class="nc" id="L42">                .setSigningKey(getSigningKey())</span>
+<span class="nc" id="L43">                .build()</span>
+<span class="nc" id="L44">                .parseClaimsJws(token)</span>
+<span class="nc" id="L45">                .getBody();</span>
+        
+<span class="nc" id="L47">        return claims.getSubject();</span>
+    }
+    
+    public boolean validateToken(String authToken) {
+        try {
+<span class="nc" id="L52">            Jwts.parserBuilder()</span>
+<span class="nc" id="L53">                .setSigningKey(getSigningKey())</span>
+<span class="nc" id="L54">                .build()</span>
+<span class="nc" id="L55">                .parseClaimsJws(authToken);</span>
+<span class="nc" id="L56">            return true;</span>
+<span class="nc" id="L57">        } catch (MalformedJwtException ex) {</span>
+<span class="nc" id="L58">            logger.error(&quot;Invalid JWT token&quot;);</span>
+<span class="nc" id="L59">        } catch (ExpiredJwtException ex) {</span>
+<span class="nc" id="L60">            logger.error(&quot;Expired JWT token&quot;);</span>
+<span class="nc" id="L61">        } catch (UnsupportedJwtException ex) {</span>
+<span class="nc" id="L62">            logger.error(&quot;Unsupported JWT token&quot;);</span>
+<span class="nc" id="L63">        } catch (IllegalArgumentException ex) {</span>
+<span class="nc" id="L64">            logger.error(&quot;JWT claims string is empty&quot;);</span>
+<span class="nc" id="L65">        } catch (Exception ex) {</span>
+<span class="nc" id="L66">            logger.error(&quot;JWT token validation failed&quot;, ex);</span>
+<span class="nc" id="L67">        }</span>
+<span class="nc" id="L68">        return false;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

@@ -1,0 +1,299 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>AuthService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">billing-backend</a> &gt; <a href="index.source.html" class="el_package">com.billing.service</a> &gt; <span class="el_source">AuthService.java</span></div><h1>AuthService.java</h1><pre class="source lang-java linenums">package com.billing.service;
+
+import com.billing.dto.JwtResponseDto;
+import com.billing.dto.LoginDto;
+import com.billing.dto.UserRegistrationDto;
+import com.billing.dto.UserResponseDto;
+import com.billing.entity.User;
+import com.billing.exception.BadRequestException;
+import com.billing.exception.ResourceNotFoundException;
+import com.billing.repository.UserRepository;
+import com.billing.security.JwtTokenProvider;
+import org.modelmapper.ModelMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+import java.util.UUID;
+import java.util.stream.Collectors;
+
+@Service
+@Transactional
+<span class="fc" id="L30">public class AuthService {</span>
+    
+<span class="fc" id="L32">    private static final Logger logger = LoggerFactory.getLogger(AuthService.class);</span>
+    
+    @Autowired
+    private UserRepository userRepository;
+    
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+    
+    @Autowired
+    private AuthenticationManager authenticationManager;
+    
+    @Autowired
+    private JwtTokenProvider tokenProvider;
+    
+    @Autowired
+    private ModelMapper modelMapper;
+    
+    @Autowired
+    private EmailService emailService;
+    
+    public UserResponseDto registerUser(UserRegistrationDto registrationDto) {
+<span class="fc bfc" id="L53" title="All 2 branches covered.">        if (userRepository.existsByUsername(registrationDto.getUsername())) {</span>
+<span class="fc" id="L54">            throw new BadRequestException(&quot;Username is already taken!&quot;);</span>
+        }
+        
+<span class="fc bfc" id="L57" title="All 2 branches covered.">        if (userRepository.existsByEmail(registrationDto.getEmail())) {</span>
+<span class="fc" id="L58">            throw new BadRequestException(&quot;Email is already in use!&quot;);</span>
+        }
+        
+        // Create new user
+<span class="fc" id="L62">        User user = new User();</span>
+<span class="fc" id="L63">        user.setUsername(registrationDto.getUsername());</span>
+<span class="fc" id="L64">        user.setEmail(registrationDto.getEmail());</span>
+<span class="fc" id="L65">        user.setPassword(passwordEncoder.encode(registrationDto.getPassword()));</span>
+<span class="fc" id="L66">        user.setFirstName(registrationDto.getFirstName());</span>
+<span class="fc" id="L67">        user.setLastName(registrationDto.getLastName());</span>
+<span class="fc" id="L68">        user.setPhoneNumber(registrationDto.getPhoneNumber());</span>
+<span class="fc" id="L69">        user.setRole(User.Role.USER);</span>
+<span class="fc" id="L70">        user.setStatus(User.UserStatus.PENDING);</span>
+<span class="fc" id="L71">        user.setEmailVerificationToken(UUID.randomUUID().toString());</span>
+        
+<span class="fc" id="L73">        User savedUser = userRepository.save(user);</span>
+        
+        // Send verification email
+<span class="fc" id="L76">        emailService.sendVerificationEmail(savedUser);</span>
+        
+<span class="fc" id="L78">        logger.info(&quot;User registered successfully: {}&quot;, savedUser.getUsername());</span>
+        
+<span class="fc" id="L80">        return new UserResponseDto(savedUser);</span>
+    }
+    
+    public JwtResponseDto authenticateUser(LoginDto loginDto) {
+<span class="nc" id="L84">        Authentication authentication = authenticationManager.authenticate(</span>
+            new UsernamePasswordAuthenticationToken(
+<span class="nc" id="L86">                loginDto.getUsername(),</span>
+<span class="nc" id="L87">                loginDto.getPassword()</span>
+            )
+        );
+        
+<span class="nc" id="L91">        SecurityContextHolder.getContext().setAuthentication(authentication);</span>
+        
+<span class="nc" id="L93">        String jwt = tokenProvider.generateToken(loginDto.getUsername());</span>
+        
+<span class="nc" id="L95">        User user = userRepository.findByUsername(loginDto.getUsername())</span>
+<span class="nc" id="L96">            .orElseThrow(() -&gt; new ResourceNotFoundException(&quot;User&quot;, &quot;username&quot;, loginDto.getUsername()));</span>
+        
+<span class="nc" id="L98">        UserResponseDto userResponse = new UserResponseDto(user);</span>
+        
+<span class="nc" id="L100">        return new JwtResponseDto(jwt, userResponse);</span>
+    }
+    
+    public UserResponseDto verifyEmail(String token) {
+<span class="nc" id="L104">        User user = userRepository.findByEmailVerificationToken(token)</span>
+<span class="nc" id="L105">            .orElseThrow(() -&gt; new BadRequestException(&quot;Invalid verification token&quot;));</span>
+        
+<span class="nc" id="L107">        user.setEmailVerified(true);</span>
+<span class="nc" id="L108">        user.setEmailVerificationToken(null);</span>
+        
+<span class="nc" id="L110">        User savedUser = userRepository.save(user);</span>
+        
+<span class="nc" id="L112">        logger.info(&quot;Email verified for user: {}&quot;, savedUser.getUsername());</span>
+        
+<span class="nc" id="L114">        return new UserResponseDto(savedUser);</span>
+    }
+    
+    public List&lt;UserResponseDto&gt; getPendingUsers() {
+<span class="nc" id="L118">        List&lt;User&gt; pendingUsers = userRepository.findByStatus(User.UserStatus.PENDING);</span>
+<span class="nc" id="L119">        return pendingUsers.stream()</span>
+<span class="nc" id="L120">            .map(UserResponseDto::new)</span>
+<span class="nc" id="L121">            .collect(Collectors.toList());</span>
+    }
+    
+    public UserResponseDto approveUser(Long userId) {
+<span class="nc" id="L125">        User user = userRepository.findById(userId)</span>
+<span class="nc" id="L126">            .orElseThrow(() -&gt; new ResourceNotFoundException(&quot;User&quot;, &quot;id&quot;, userId));</span>
+        
+<span class="nc bnc" id="L128" title="All 2 branches missed.">        if (!user.isEmailVerified()) {</span>
+<span class="nc" id="L129">            throw new BadRequestException(&quot;User email must be verified before approval&quot;);</span>
+        }
+        
+<span class="nc" id="L132">        user.setStatus(User.UserStatus.APPROVED);</span>
+        
+        // Create user-specific database name
+<span class="nc" id="L135">        String databaseName = &quot;billing_user_&quot; + userId;</span>
+<span class="nc" id="L136">        user.setDatabaseName(databaseName);</span>
+        
+<span class="nc" id="L138">        User savedUser = userRepository.save(user);</span>
+        
+        // TODO: Create user-specific database
+        // This would involve creating a new database schema for the user
+        
+<span class="nc" id="L143">        logger.info(&quot;User approved: {}&quot;, savedUser.getUsername());</span>
+        
+<span class="nc" id="L145">        return new UserResponseDto(savedUser);</span>
+    }
+    
+    public UserResponseDto rejectUser(Long userId) {
+<span class="nc" id="L149">        User user = userRepository.findById(userId)</span>
+<span class="nc" id="L150">            .orElseThrow(() -&gt; new ResourceNotFoundException(&quot;User&quot;, &quot;id&quot;, userId));</span>
+        
+<span class="nc" id="L152">        user.setStatus(User.UserStatus.REJECTED);</span>
+<span class="nc" id="L153">        User savedUser = userRepository.save(user);</span>
+        
+<span class="nc" id="L155">        logger.info(&quot;User rejected: {}&quot;, savedUser.getUsername());</span>
+        
+<span class="nc" id="L157">        return new UserResponseDto(savedUser);</span>
+    }
+    
+    public List&lt;UserResponseDto&gt; getAllUsers() {
+<span class="nc" id="L161">        List&lt;User&gt; users = userRepository.findAll();</span>
+<span class="nc" id="L162">        return users.stream()</span>
+<span class="nc" id="L163">            .map(UserResponseDto::new)</span>
+<span class="nc" id="L164">            .collect(Collectors.toList());</span>
+    }
+    
+    public UserResponseDto createUser(UserRegistrationDto registrationDto) {
+<span class="nc bnc" id="L168" title="All 2 branches missed.">        if (userRepository.existsByUsername(registrationDto.getUsername())) {</span>
+<span class="nc" id="L169">            throw new BadRequestException(&quot;Username is already taken!&quot;);</span>
+        }
+        
+<span class="nc bnc" id="L172" title="All 2 branches missed.">        if (userRepository.existsByEmail(registrationDto.getEmail())) {</span>
+<span class="nc" id="L173">            throw new BadRequestException(&quot;Email is already in use!&quot;);</span>
+        }
+        
+        // Create new user
+<span class="nc" id="L177">        User user = new User();</span>
+<span class="nc" id="L178">        user.setUsername(registrationDto.getUsername());</span>
+<span class="nc" id="L179">        user.setEmail(registrationDto.getEmail());</span>
+<span class="nc" id="L180">        user.setPassword(passwordEncoder.encode(registrationDto.getPassword()));</span>
+<span class="nc" id="L181">        user.setFirstName(registrationDto.getFirstName());</span>
+<span class="nc" id="L182">        user.setLastName(registrationDto.getLastName());</span>
+<span class="nc" id="L183">        user.setPhoneNumber(registrationDto.getPhoneNumber());</span>
+        
+        // Set role from DTO or default to USER
+<span class="nc bnc" id="L186" title="All 4 branches missed.">        if (registrationDto.getRole() != null &amp;&amp; registrationDto.getRole().equalsIgnoreCase(&quot;ADMIN&quot;)) {</span>
+<span class="nc" id="L187">            user.setRole(User.Role.ADMIN);</span>
+        } else {
+<span class="nc" id="L189">            user.setRole(User.Role.USER);</span>
+        }
+        
+        // Set status based on enabled field or default to APPROVED for admin-created users
+<span class="nc bnc" id="L193" title="All 4 branches missed.">        if (registrationDto.getEnabled() != null &amp;&amp; !registrationDto.getEnabled()) {</span>
+<span class="nc" id="L194">            user.setStatus(User.UserStatus.SUSPENDED);</span>
+        } else {
+<span class="nc" id="L196">            user.setStatus(User.UserStatus.APPROVED);</span>
+        }
+        
+<span class="nc" id="L199">        user.setEmailVerified(true); // Admin created users are auto-verified</span>
+        
+<span class="nc" id="L201">        User savedUser = userRepository.save(user);</span>
+        
+<span class="nc" id="L203">        logger.info(&quot;User created by admin: {}&quot;, savedUser.getUsername());</span>
+        
+<span class="nc" id="L205">        return new UserResponseDto(savedUser);</span>
+    }
+    
+    public UserResponseDto updateUser(Long userId, UserRegistrationDto userDto) {
+<span class="nc" id="L209">        User user = userRepository.findById(userId)</span>
+<span class="nc" id="L210">            .orElseThrow(() -&gt; new ResourceNotFoundException(&quot;User&quot;, &quot;id&quot;, userId));</span>
+        
+        // Check if username is being changed and if it conflicts
+<span class="nc bnc" id="L213" title="All 2 branches missed.">        if (!user.getUsername().equals(userDto.getUsername()) &amp;&amp; </span>
+<span class="nc bnc" id="L214" title="All 2 branches missed.">            userRepository.existsByUsername(userDto.getUsername())) {</span>
+<span class="nc" id="L215">            throw new BadRequestException(&quot;Username is already taken!&quot;);</span>
+        }
+        
+        // Check if email is being changed and if it conflicts
+<span class="nc bnc" id="L219" title="All 2 branches missed.">        if (!user.getEmail().equals(userDto.getEmail()) &amp;&amp; </span>
+<span class="nc bnc" id="L220" title="All 2 branches missed.">            userRepository.existsByEmail(userDto.getEmail())) {</span>
+<span class="nc" id="L221">            throw new BadRequestException(&quot;Email is already in use!&quot;);</span>
+        }
+        
+        // Update user fields
+<span class="nc" id="L225">        user.setUsername(userDto.getUsername());</span>
+<span class="nc" id="L226">        user.setEmail(userDto.getEmail());</span>
+<span class="nc" id="L227">        user.setFirstName(userDto.getFirstName());</span>
+<span class="nc" id="L228">        user.setLastName(userDto.getLastName());</span>
+<span class="nc" id="L229">        user.setPhoneNumber(userDto.getPhoneNumber());</span>
+        
+        // Update role if provided
+<span class="nc bnc" id="L232" title="All 2 branches missed.">        if (userDto.getRole() != null) {</span>
+<span class="nc bnc" id="L233" title="All 2 branches missed.">            if (userDto.getRole().equalsIgnoreCase(&quot;ADMIN&quot;)) {</span>
+<span class="nc" id="L234">                user.setRole(User.Role.ADMIN);</span>
+            } else {
+<span class="nc" id="L236">                user.setRole(User.Role.USER);</span>
+            }
+        }
+        
+        // Update status based on enabled field
+<span class="nc bnc" id="L241" title="All 2 branches missed.">        if (userDto.getEnabled() != null) {</span>
+<span class="nc bnc" id="L242" title="All 2 branches missed.">            if (userDto.getEnabled()) {</span>
+<span class="nc" id="L243">                user.setStatus(User.UserStatus.APPROVED);</span>
+            } else {
+<span class="nc" id="L245">                user.setStatus(User.UserStatus.SUSPENDED);</span>
+            }
+        }
+        
+        // Only update password if provided
+<span class="nc bnc" id="L250" title="All 4 branches missed.">        if (userDto.getPassword() != null &amp;&amp; !userDto.getPassword().trim().isEmpty()) {</span>
+<span class="nc" id="L251">            user.setPassword(passwordEncoder.encode(userDto.getPassword()));</span>
+        }
+        
+<span class="nc" id="L254">        User savedUser = userRepository.save(user);</span>
+        
+<span class="nc" id="L256">        logger.info(&quot;User updated by admin: {}&quot;, savedUser.getUsername());</span>
+        
+<span class="nc" id="L258">        return new UserResponseDto(savedUser);</span>
+    }
+    
+    public void deleteUser(Long userId) {
+<span class="nc" id="L262">        User user = userRepository.findById(userId)</span>
+<span class="nc" id="L263">            .orElseThrow(() -&gt; new ResourceNotFoundException(&quot;User&quot;, &quot;id&quot;, userId));</span>
+        
+<span class="nc" id="L265">        userRepository.delete(user);</span>
+        
+<span class="nc" id="L267">        logger.info(&quot;User deleted by admin: {}&quot;, user.getUsername());</span>
+<span class="nc" id="L268">    }</span>
+    
+    public UserResponseDto updateUserStatus(Long userId, boolean enabled) {
+<span class="nc" id="L271">        User user = userRepository.findById(userId)</span>
+<span class="nc" id="L272">            .orElseThrow(() -&gt; new ResourceNotFoundException(&quot;User&quot;, &quot;id&quot;, userId));</span>
+        
+<span class="nc bnc" id="L274" title="All 2 branches missed.">        User.UserStatus newStatus = enabled ? User.UserStatus.APPROVED : User.UserStatus.SUSPENDED;</span>
+<span class="nc" id="L275">        user.setStatus(newStatus);</span>
+        
+<span class="nc" id="L277">        User savedUser = userRepository.save(user);</span>
+        
+<span class="nc" id="L279">        logger.info(&quot;User status updated by admin: {} - {}&quot;, savedUser.getUsername(), newStatus);</span>
+        
+<span class="nc" id="L281">        return new UserResponseDto(savedUser);</span>
+    }
+    
+    public String resetUserPassword(Long userId) {
+<span class="nc" id="L285">        User user = userRepository.findById(userId)</span>
+<span class="nc" id="L286">            .orElseThrow(() -&gt; new ResourceNotFoundException(&quot;User&quot;, &quot;id&quot;, userId));</span>
+        
+        // Generate a random temporary password
+<span class="nc" id="L289">        String newPassword = UUID.randomUUID().toString().substring(0, 8);</span>
+<span class="nc" id="L290">        user.setPassword(passwordEncoder.encode(newPassword));</span>
+        
+<span class="nc" id="L292">        userRepository.save(user);</span>
+        
+<span class="nc" id="L294">        logger.info(&quot;Password reset by admin for user: {}&quot;, user.getUsername());</span>
+        
+<span class="nc" id="L296">        return newPassword;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

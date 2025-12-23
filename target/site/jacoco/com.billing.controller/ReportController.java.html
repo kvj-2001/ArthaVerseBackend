@@ -1,0 +1,217 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ReportController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">billing-backend</a> &gt; <a href="index.source.html" class="el_package">com.billing.controller</a> &gt; <span class="el_source">ReportController.java</span></div><h1>ReportController.java</h1><pre class="source lang-java linenums">package com.billing.controller;
+
+import com.billing.dto.ReportDto;
+import com.billing.service.ReportService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.io.IOException;
+import java.time.LocalDate;
+
+@RestController
+@RequestMapping(&quot;/reports&quot;)
+@Tag(name = &quot;Reports&quot;, description = &quot;Reporting and analytics endpoints&quot;)
+<span class="nc" id="L21">public class ReportController {</span>
+    
+    @Autowired
+    private ReportService reportService;
+    
+    @Operation(summary = &quot;Get dashboard report data&quot;)
+    @GetMapping(&quot;/dashboard&quot;)
+    public ResponseEntity&lt;ReportDto&gt; getDashboardReport(
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
+            @RequestParam(required = false) String status,
+            @RequestParam(required = false) String customer) {
+        
+        // Use default date range if not provided (last 30 days)
+<span class="nc bnc" id="L35" title="All 2 branches missed.">        if (startDate == null) {</span>
+<span class="nc" id="L36">            startDate = LocalDate.now().minusDays(30);</span>
+        }
+<span class="nc bnc" id="L38" title="All 2 branches missed.">        if (endDate == null) {</span>
+<span class="nc" id="L39">            endDate = LocalDate.now();</span>
+        }
+        
+<span class="nc" id="L42">        ReportDto report = reportService.getDashboardReport(startDate, endDate, status, customer);</span>
+<span class="nc" id="L43">        return ResponseEntity.ok(report);</span>
+    }
+    
+    @Operation(summary = &quot;Export dashboard report to PDF&quot;)
+    @GetMapping(&quot;/export/pdf&quot;)
+    public ResponseEntity&lt;byte[]&gt; exportDashboardReportToPdf(
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
+            @RequestParam(required = false) String status,
+            @RequestParam(required = false) String customer) {
+        try {
+            // Use default date range if not provided (last 30 days)
+<span class="nc bnc" id="L55" title="All 2 branches missed.">            if (startDate == null) {</span>
+<span class="nc" id="L56">                startDate = LocalDate.now().minusDays(30);</span>
+            }
+<span class="nc bnc" id="L58" title="All 2 branches missed.">            if (endDate == null) {</span>
+<span class="nc" id="L59">                endDate = LocalDate.now();</span>
+            }
+            
+<span class="nc" id="L62">            ReportDto report = reportService.getDashboardReport(startDate, endDate, status, customer);</span>
+<span class="nc" id="L63">            byte[] pdfData = reportService.exportReportToPdf(report);</span>
+            
+<span class="nc" id="L65">            HttpHeaders headers = new HttpHeaders();</span>
+<span class="nc" id="L66">            headers.setContentType(MediaType.APPLICATION_PDF);</span>
+<span class="nc" id="L67">            headers.setContentDispositionFormData(&quot;attachment&quot;, &quot;dashboard-report-&quot; + startDate + &quot;-to-&quot; + endDate + &quot;.pdf&quot;);</span>
+            
+<span class="nc" id="L69">            return new ResponseEntity&lt;&gt;(pdfData, headers, HttpStatus.OK);</span>
+<span class="nc" id="L70">        } catch (IOException e) {</span>
+<span class="nc" id="L71">            return ResponseEntity.internalServerError().build();</span>
+        }
+    }
+    
+    @Operation(summary = &quot;Export dashboard report to Excel&quot;)
+    @GetMapping(&quot;/export/excel&quot;)
+    public ResponseEntity&lt;byte[]&gt; exportDashboardReportToExcel(
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
+            @RequestParam(required = false) String status,
+            @RequestParam(required = false) String customer) {
+        try {
+            // Use default date range if not provided (last 30 days)
+<span class="nc bnc" id="L84" title="All 2 branches missed.">            if (startDate == null) {</span>
+<span class="nc" id="L85">                startDate = LocalDate.now().minusDays(30);</span>
+            }
+<span class="nc bnc" id="L87" title="All 2 branches missed.">            if (endDate == null) {</span>
+<span class="nc" id="L88">                endDate = LocalDate.now();</span>
+            }
+            
+<span class="nc" id="L91">            ReportDto report = reportService.getDashboardReport(startDate, endDate, status, customer);</span>
+<span class="nc" id="L92">            byte[] excelData = reportService.exportReportToExcel(report);</span>
+            
+<span class="nc" id="L94">            HttpHeaders headers = new HttpHeaders();</span>
+<span class="nc" id="L95">            headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);</span>
+<span class="nc" id="L96">            headers.setContentDispositionFormData(&quot;attachment&quot;, &quot;dashboard-report-&quot; + startDate + &quot;-to-&quot; + endDate + &quot;.xlsx&quot;);</span>
+            
+<span class="nc" id="L98">            return new ResponseEntity&lt;&gt;(excelData, headers, HttpStatus.OK);</span>
+<span class="nc" id="L99">        } catch (IOException e) {</span>
+<span class="nc" id="L100">            return ResponseEntity.internalServerError().build();</span>
+        }
+    }
+    
+    @Operation(summary = &quot;Get daily sales report&quot;)
+    @GetMapping(&quot;/daily/{date}&quot;)
+    public ResponseEntity&lt;ReportDto&gt; getDailySalesReport(
+            @PathVariable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
+<span class="nc" id="L108">        ReportDto report = reportService.getDailySalesReport(date);</span>
+<span class="nc" id="L109">        return ResponseEntity.ok(report);</span>
+    }
+    
+    @Operation(summary = &quot;Get monthly sales report&quot;)
+    @GetMapping(&quot;/monthly/{year}/{month}&quot;)
+    public ResponseEntity&lt;ReportDto&gt; getMonthlySalesReport(
+            @PathVariable int year, 
+            @PathVariable int month) {
+<span class="nc" id="L117">        ReportDto report = reportService.getMonthlySalesReport(year, month);</span>
+<span class="nc" id="L118">        return ResponseEntity.ok(report);</span>
+    }
+    
+    @Operation(summary = &quot;Get yearly sales report&quot;)
+    @GetMapping(&quot;/yearly/{year}&quot;)
+    public ResponseEntity&lt;ReportDto&gt; getYearlySalesReport(@PathVariable int year) {
+<span class="nc" id="L124">        ReportDto report = reportService.getYearlySalesReport(year);</span>
+<span class="nc" id="L125">        return ResponseEntity.ok(report);</span>
+    }
+    
+    @Operation(summary = &quot;Get custom date range report&quot;)
+    @GetMapping(&quot;/custom&quot;)
+    public ResponseEntity&lt;ReportDto&gt; getCustomDateRangeReport(
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate) {
+<span class="nc" id="L133">        ReportDto report = reportService.getCustomDateRangeReport(startDate, endDate);</span>
+<span class="nc" id="L134">        return ResponseEntity.ok(report);</span>
+    }
+    
+    @Operation(summary = &quot;Get product performance report&quot;)
+    @GetMapping(&quot;/product-performance&quot;)
+    public ResponseEntity&lt;ReportDto&gt; getProductPerformanceReport() {
+<span class="nc" id="L140">        ReportDto report = reportService.getProductPerformanceReport();</span>
+<span class="nc" id="L141">        return ResponseEntity.ok(report);</span>
+    }
+    
+    @Operation(summary = &quot;Export daily report to Excel&quot;)
+    @GetMapping(&quot;/daily/{date}/excel&quot;)
+    public ResponseEntity&lt;byte[]&gt; exportDailyReportToExcel(
+            @PathVariable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
+        try {
+<span class="nc" id="L149">            ReportDto report = reportService.getDailySalesReport(date);</span>
+<span class="nc" id="L150">            byte[] excelData = reportService.exportReportToExcel(report);</span>
+            
+<span class="nc" id="L152">            HttpHeaders headers = new HttpHeaders();</span>
+<span class="nc" id="L153">            headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);</span>
+<span class="nc" id="L154">            headers.setContentDispositionFormData(&quot;attachment&quot;, &quot;daily-report-&quot; + date + &quot;.xlsx&quot;);</span>
+            
+<span class="nc" id="L156">            return new ResponseEntity&lt;&gt;(excelData, headers, HttpStatus.OK);</span>
+<span class="nc" id="L157">        } catch (IOException e) {</span>
+<span class="nc" id="L158">            return ResponseEntity.internalServerError().build();</span>
+        }
+    }
+    
+    @Operation(summary = &quot;Export monthly report to Excel&quot;)
+    @GetMapping(&quot;/monthly/{year}/{month}/excel&quot;)
+    public ResponseEntity&lt;byte[]&gt; exportMonthlyReportToExcel(
+            @PathVariable int year, 
+            @PathVariable int month) {
+        try {
+<span class="nc" id="L168">            ReportDto report = reportService.getMonthlySalesReport(year, month);</span>
+<span class="nc" id="L169">            byte[] excelData = reportService.exportReportToExcel(report);</span>
+            
+<span class="nc" id="L171">            HttpHeaders headers = new HttpHeaders();</span>
+<span class="nc" id="L172">            headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);</span>
+<span class="nc" id="L173">            headers.setContentDispositionFormData(&quot;attachment&quot;, &quot;monthly-report-&quot; + year + &quot;-&quot; + month + &quot;.xlsx&quot;);</span>
+            
+<span class="nc" id="L175">            return new ResponseEntity&lt;&gt;(excelData, headers, HttpStatus.OK);</span>
+<span class="nc" id="L176">        } catch (IOException e) {</span>
+<span class="nc" id="L177">            return ResponseEntity.internalServerError().build();</span>
+        }
+    }
+    
+    @Operation(summary = &quot;Export yearly report to Excel&quot;)
+    @GetMapping(&quot;/yearly/{year}/excel&quot;)
+    public ResponseEntity&lt;byte[]&gt; exportYearlyReportToExcel(@PathVariable int year) {
+        try {
+<span class="nc" id="L185">            ReportDto report = reportService.getYearlySalesReport(year);</span>
+<span class="nc" id="L186">            byte[] excelData = reportService.exportReportToExcel(report);</span>
+            
+<span class="nc" id="L188">            HttpHeaders headers = new HttpHeaders();</span>
+<span class="nc" id="L189">            headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);</span>
+<span class="nc" id="L190">            headers.setContentDispositionFormData(&quot;attachment&quot;, &quot;yearly-report-&quot; + year + &quot;.xlsx&quot;);</span>
+            
+<span class="nc" id="L192">            return new ResponseEntity&lt;&gt;(excelData, headers, HttpStatus.OK);</span>
+<span class="nc" id="L193">        } catch (IOException e) {</span>
+<span class="nc" id="L194">            return ResponseEntity.internalServerError().build();</span>
+        }
+    }
+    
+    @Operation(summary = &quot;Export custom range report to Excel&quot;)
+    @GetMapping(&quot;/custom/excel&quot;)
+    public ResponseEntity&lt;byte[]&gt; exportCustomRangeReportToExcel(
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate) {
+        try {
+<span class="nc" id="L204">            ReportDto report = reportService.getCustomDateRangeReport(startDate, endDate);</span>
+<span class="nc" id="L205">            byte[] excelData = reportService.exportReportToExcel(report);</span>
+            
+<span class="nc" id="L207">            HttpHeaders headers = new HttpHeaders();</span>
+<span class="nc" id="L208">            headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);</span>
+<span class="nc" id="L209">            headers.setContentDispositionFormData(&quot;attachment&quot;, &quot;custom-report-&quot; + startDate + &quot;-to-&quot; + endDate + &quot;.xlsx&quot;);</span>
+            
+<span class="nc" id="L211">            return new ResponseEntity&lt;&gt;(excelData, headers, HttpStatus.OK);</span>
+<span class="nc" id="L212">        } catch (IOException e) {</span>
+<span class="nc" id="L213">            return ResponseEntity.internalServerError().build();</span>
+        }
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

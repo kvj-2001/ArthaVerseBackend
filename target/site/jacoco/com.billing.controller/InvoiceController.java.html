@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>InvoiceController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">billing-backend</a> &gt; <a href="index.source.html" class="el_package">com.billing.controller</a> &gt; <span class="el_source">InvoiceController.java</span></div><h1>InvoiceController.java</h1><pre class="source lang-java linenums">package com.billing.controller;
+
+import com.billing.dto.InvoiceDto;
+import com.billing.entity.Invoice;
+import com.billing.service.InvoiceService;
+import com.billing.service.PdfService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+@RestController
+@RequestMapping(&quot;/invoices&quot;)
+@Tag(name = &quot;Invoices&quot;, description = &quot;Invoice management endpoints&quot;)
+<span class="nc" id="L24">public class InvoiceController {</span>
+    
+    @Autowired
+    private InvoiceService invoiceService;
+    
+    @Autowired
+    private PdfService pdfService;
+    
+    @Operation(summary = &quot;Create a new invoice&quot;)
+    @PostMapping
+    public ResponseEntity&lt;InvoiceDto&gt; createInvoice(@Valid @RequestBody InvoiceDto invoiceDto) {
+<span class="nc" id="L35">        InvoiceDto createdInvoice = invoiceService.createInvoice(invoiceDto);</span>
+<span class="nc" id="L36">        return new ResponseEntity&lt;&gt;(createdInvoice, HttpStatus.CREATED);</span>
+    }
+    
+    @Operation(summary = &quot;Update an existing invoice&quot;)
+    @PutMapping(&quot;/{id}&quot;)
+    public ResponseEntity&lt;InvoiceDto&gt; updateInvoice(@PathVariable Long id, @Valid @RequestBody InvoiceDto invoiceDto) {
+<span class="nc" id="L42">        InvoiceDto updatedInvoice = invoiceService.updateInvoice(id, invoiceDto);</span>
+<span class="nc" id="L43">        return ResponseEntity.ok(updatedInvoice);</span>
+    }
+    
+    @Operation(summary = &quot;Delete an invoice&quot;)
+    @DeleteMapping(&quot;/{id}&quot;)
+    public ResponseEntity&lt;Void&gt; deleteInvoice(@PathVariable Long id) {
+<span class="nc" id="L49">        invoiceService.deleteInvoice(id);</span>
+<span class="nc" id="L50">        return ResponseEntity.noContent().build();</span>
+    }
+    
+    @Operation(summary = &quot;Get an invoice by ID&quot;)
+    @GetMapping(&quot;/{id}&quot;)
+    public ResponseEntity&lt;InvoiceDto&gt; getInvoice(@PathVariable Long id) {
+<span class="nc" id="L56">        InvoiceDto invoice = invoiceService.getInvoice(id);</span>
+<span class="nc" id="L57">        return ResponseEntity.ok(invoice);</span>
+    }
+    
+    @Operation(summary = &quot;Get all invoices with pagination&quot;)
+    @GetMapping
+    public ResponseEntity&lt;Page&lt;InvoiceDto&gt;&gt; getAllInvoices(Pageable pageable) {
+<span class="nc" id="L63">        Page&lt;InvoiceDto&gt; invoices = invoiceService.getAllInvoices(pageable);</span>
+<span class="nc" id="L64">        return ResponseEntity.ok(invoices);</span>
+    }
+    
+    @Operation(summary = &quot;Search invoices by keyword&quot;)
+    @GetMapping(&quot;/search&quot;)
+    public ResponseEntity&lt;Page&lt;InvoiceDto&gt;&gt; searchInvoices(@RequestParam String keyword, Pageable pageable) {
+<span class="nc" id="L70">        Page&lt;InvoiceDto&gt; invoices = invoiceService.searchInvoices(keyword, pageable);</span>
+<span class="nc" id="L71">        return ResponseEntity.ok(invoices);</span>
+    }
+    
+    @Operation(summary = &quot;Get invoices by status&quot;)
+    @GetMapping(&quot;/status/{status}&quot;)
+    public ResponseEntity&lt;List&lt;InvoiceDto&gt;&gt; getInvoicesByStatus(@PathVariable Invoice.InvoiceStatus status) {
+<span class="nc" id="L77">        List&lt;InvoiceDto&gt; invoices = invoiceService.getInvoicesByStatus(status);</span>
+<span class="nc" id="L78">        return ResponseEntity.ok(invoices);</span>
+    }
+    
+    @Operation(summary = &quot;Get overdue invoices&quot;)
+    @GetMapping(&quot;/overdue&quot;)
+    public ResponseEntity&lt;List&lt;InvoiceDto&gt;&gt; getOverdueInvoices() {
+<span class="nc" id="L84">        List&lt;InvoiceDto&gt; invoices = invoiceService.getOverdueInvoices();</span>
+<span class="nc" id="L85">        return ResponseEntity.ok(invoices);</span>
+    }
+    
+    @Operation(summary = &quot;Update invoice status&quot;)
+    @PatchMapping(&quot;/{id}/status&quot;)
+    public ResponseEntity&lt;InvoiceDto&gt; updateInvoiceStatus(@PathVariable Long id, @RequestParam Invoice.InvoiceStatus status) {
+<span class="nc" id="L91">        InvoiceDto updatedInvoice = invoiceService.updateInvoiceStatus(id, status);</span>
+<span class="nc" id="L92">        return ResponseEntity.ok(updatedInvoice);</span>
+    }
+    
+    @Operation(summary = &quot;Generate and download invoice PDF&quot;)
+    @GetMapping(&quot;/{id}/pdf&quot;)
+    public ResponseEntity&lt;byte[]&gt; generateInvoicePdf(@PathVariable Long id) {
+        try {
+<span class="nc" id="L99">            byte[] pdfData = invoiceService.generateInvoicePdf(id);</span>
+            
+<span class="nc" id="L101">            InvoiceDto invoiceDto = invoiceService.getInvoice(id);</span>
+            
+<span class="nc" id="L103">            HttpHeaders headers = new HttpHeaders();</span>
+<span class="nc" id="L104">            headers.setContentType(MediaType.APPLICATION_PDF);</span>
+<span class="nc" id="L105">            headers.setContentDispositionFormData(&quot;attachment&quot;, &quot;invoice-&quot; + invoiceDto.getInvoiceNumber() + &quot;.pdf&quot;);</span>
+            
+<span class="nc" id="L107">            return new ResponseEntity&lt;&gt;(pdfData, headers, HttpStatus.OK);</span>
+<span class="nc" id="L108">        } catch (Exception e) {</span>
+<span class="nc" id="L109">            return ResponseEntity.internalServerError().build();</span>
+        }
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

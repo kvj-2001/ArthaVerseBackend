@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>AuthController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">billing-backend</a> &gt; <a href="index.source.html" class="el_package">com.billing.controller</a> &gt; <span class="el_source">AuthController.java</span></div><h1>AuthController.java</h1><pre class="source lang-java linenums">package com.billing.controller;
+
+import com.billing.dto.JwtResponseDto;
+import com.billing.dto.LoginDto;
+import com.billing.dto.PasswordResetResponseDto;
+import com.billing.dto.UserRegistrationDto;
+import com.billing.dto.UserResponseDto;
+import com.billing.service.AuthService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+@RestController
+@RequestMapping(&quot;/auth&quot;)
+@Tag(name = &quot;Authentication&quot;, description = &quot;Authentication and user management endpoints&quot;)
+<span class="nc" id="L23">public class AuthController {</span>
+    
+    @Autowired
+    private AuthService authService;
+    
+    @Operation(summary = &quot;Register a new user&quot;)
+    @PostMapping(&quot;/register&quot;)
+    public ResponseEntity&lt;UserResponseDto&gt; register(@Valid @RequestBody UserRegistrationDto registrationDto) {
+<span class="nc" id="L31">        UserResponseDto user = authService.registerUser(registrationDto);</span>
+<span class="nc" id="L32">        return new ResponseEntity&lt;&gt;(user, HttpStatus.CREATED);</span>
+    }
+    
+    @Operation(summary = &quot;Authenticate user and get JWT token&quot;)
+    @PostMapping(&quot;/login&quot;)
+    public ResponseEntity&lt;JwtResponseDto&gt; login(@Valid @RequestBody LoginDto loginDto) {
+<span class="nc" id="L38">        JwtResponseDto response = authService.authenticateUser(loginDto);</span>
+<span class="nc" id="L39">        return ResponseEntity.ok(response);</span>
+    }
+    
+    @Operation(summary = &quot;Verify user email&quot;)
+    @GetMapping(&quot;/verify-email&quot;)
+    public ResponseEntity&lt;UserResponseDto&gt; verifyEmail(@RequestParam String token) {
+<span class="nc" id="L45">        UserResponseDto user = authService.verifyEmail(token);</span>
+<span class="nc" id="L46">        return ResponseEntity.ok(user);</span>
+    }
+    
+    @Operation(summary = &quot;Get pending users (Admin only)&quot;)
+    @GetMapping(&quot;/pending-users&quot;)
+    @PreAuthorize(&quot;hasRole('ADMIN')&quot;)
+    public ResponseEntity&lt;List&lt;UserResponseDto&gt;&gt; getPendingUsers() {
+<span class="nc" id="L53">        List&lt;UserResponseDto&gt; users = authService.getPendingUsers();</span>
+<span class="nc" id="L54">        return ResponseEntity.ok(users);</span>
+    }
+    
+    @Operation(summary = &quot;Approve user (Admin only)&quot;)
+    @PutMapping(&quot;/approve-user/{userId}&quot;)
+    @PreAuthorize(&quot;hasRole('ADMIN')&quot;)
+    public ResponseEntity&lt;UserResponseDto&gt; approveUser(@PathVariable Long userId) {
+<span class="nc" id="L61">        UserResponseDto user = authService.approveUser(userId);</span>
+<span class="nc" id="L62">        return ResponseEntity.ok(user);</span>
+    }
+    
+    @Operation(summary = &quot;Reject user (Admin only)&quot;)
+    @PutMapping(&quot;/reject-user/{userId}&quot;)
+    @PreAuthorize(&quot;hasRole('ADMIN')&quot;)
+    public ResponseEntity&lt;UserResponseDto&gt; rejectUser(@PathVariable Long userId) {
+<span class="nc" id="L69">        UserResponseDto user = authService.rejectUser(userId);</span>
+<span class="nc" id="L70">        return ResponseEntity.ok(user);</span>
+    }
+    
+    @Operation(summary = &quot;Get all users (Admin only)&quot;)
+    @GetMapping(&quot;/users&quot;)
+    @PreAuthorize(&quot;hasRole('ADMIN')&quot;)
+    public ResponseEntity&lt;List&lt;UserResponseDto&gt;&gt; getAllUsers() {
+<span class="nc" id="L77">        List&lt;UserResponseDto&gt; users = authService.getAllUsers();</span>
+<span class="nc" id="L78">        return ResponseEntity.ok(users);</span>
+    }
+    
+    @Operation(summary = &quot;Create user (Admin only)&quot;)
+    @PostMapping(&quot;/users&quot;)
+    @PreAuthorize(&quot;hasRole('ADMIN')&quot;)
+    public ResponseEntity&lt;UserResponseDto&gt; createUser(@Valid @RequestBody UserRegistrationDto registrationDto) {
+<span class="nc" id="L85">        UserResponseDto user = authService.createUser(registrationDto);</span>
+<span class="nc" id="L86">        return new ResponseEntity&lt;&gt;(user, HttpStatus.CREATED);</span>
+    }
+    
+    @Operation(summary = &quot;Update user (Admin only)&quot;)
+    @PutMapping(&quot;/users/{userId}&quot;)
+    @PreAuthorize(&quot;hasRole('ADMIN')&quot;)
+    public ResponseEntity&lt;UserResponseDto&gt; updateUser(@PathVariable Long userId, @RequestBody UserRegistrationDto userDto) {
+<span class="nc" id="L93">        UserResponseDto user = authService.updateUser(userId, userDto);</span>
+<span class="nc" id="L94">        return ResponseEntity.ok(user);</span>
+    }
+    
+    @Operation(summary = &quot;Delete user (Admin only)&quot;)
+    @DeleteMapping(&quot;/users/{userId}&quot;)
+    @PreAuthorize(&quot;hasRole('ADMIN')&quot;)
+    public ResponseEntity&lt;Void&gt; deleteUser(@PathVariable Long userId) {
+<span class="nc" id="L101">        authService.deleteUser(userId);</span>
+<span class="nc" id="L102">        return ResponseEntity.noContent().build();</span>
+    }
+    
+    @Operation(summary = &quot;Update user status (Admin only)&quot;)
+    @PatchMapping(&quot;/users/{userId}/status&quot;)
+    @PreAuthorize(&quot;hasRole('ADMIN')&quot;)
+    public ResponseEntity&lt;UserResponseDto&gt; updateUserStatus(@PathVariable Long userId, @RequestParam boolean enabled) {
+<span class="nc" id="L109">        UserResponseDto user = authService.updateUserStatus(userId, enabled);</span>
+<span class="nc" id="L110">        return ResponseEntity.ok(user);</span>
+    }
+    
+    @Operation(summary = &quot;Reset user password (Admin only)&quot;)
+    @PostMapping(&quot;/users/{userId}/reset-password&quot;)
+    @PreAuthorize(&quot;hasRole('ADMIN')&quot;)
+    public ResponseEntity&lt;PasswordResetResponseDto&gt; resetUserPassword(@PathVariable Long userId) {
+<span class="nc" id="L117">        String newPassword = authService.resetUserPassword(userId);</span>
+<span class="nc" id="L118">        return ResponseEntity.ok(new PasswordResetResponseDto(newPassword));</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>InvoiceItemDto.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">billing-backend</a> &gt; <a href="index.source.html" class="el_package">com.billing.dto</a> &gt; <span class="el_source">InvoiceItemDto.java</span></div><h1>InvoiceItemDto.java</h1><pre class="source lang-java linenums">package com.billing.dto;
+
+import com.billing.validation.ValidQuantity;
+import jakarta.validation.constraints.DecimalMin;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
+
+import java.math.BigDecimal;
+
+@ValidQuantity
+public class InvoiceItemDto {
+    
+    private Long id;
+    
+    @NotNull(message = &quot;Product ID is required&quot;)
+    private Long productId;
+    
+    private String productName;
+    
+    private String productCode;
+    
+    private String productUnit;
+    
+    @NotNull(message = &quot;Quantity is required&quot;)
+    @DecimalMin(value = &quot;0.0&quot;, inclusive = false, message = &quot;Quantity must be greater than 0&quot;)
+    private BigDecimal quantity;
+    
+    @NotNull(message = &quot;Unit price is required&quot;)
+    @DecimalMin(value = &quot;0.0&quot;, inclusive = false, message = &quot;Unit price must be greater than 0&quot;)
+    private BigDecimal unitPrice;
+    
+<span class="nc" id="L32">    private BigDecimal totalPrice = BigDecimal.ZERO;</span>
+    
+    private String description;
+    
+    // Constructors
+<span class="nc" id="L37">    public InvoiceItemDto() {}</span>
+    
+<span class="nc" id="L39">    public InvoiceItemDto(Long productId, BigDecimal quantity, BigDecimal unitPrice) {</span>
+<span class="nc" id="L40">        this.productId = productId;</span>
+<span class="nc" id="L41">        this.quantity = quantity;</span>
+<span class="nc" id="L42">        this.unitPrice = unitPrice;</span>
+<span class="nc" id="L43">        this.totalPrice = unitPrice.multiply(quantity);</span>
+<span class="nc" id="L44">    }</span>
+    
+    // Getters and Setters
+    public Long getId() {
+<span class="nc" id="L48">        return id;</span>
+    }
+    
+    public void setId(Long id) {
+<span class="nc" id="L52">        this.id = id;</span>
+<span class="nc" id="L53">    }</span>
+    
+    public Long getProductId() {
+<span class="nc" id="L56">        return productId;</span>
+    }
+    
+    public void setProductId(Long productId) {
+<span class="nc" id="L60">        this.productId = productId;</span>
+<span class="nc" id="L61">    }</span>
+    
+    public String getProductName() {
+<span class="nc" id="L64">        return productName;</span>
+    }
+    
+    public void setProductName(String productName) {
+<span class="nc" id="L68">        this.productName = productName;</span>
+<span class="nc" id="L69">    }</span>
+    
+    public String getProductCode() {
+<span class="nc" id="L72">        return productCode;</span>
+    }
+    
+    public void setProductCode(String productCode) {
+<span class="nc" id="L76">        this.productCode = productCode;</span>
+<span class="nc" id="L77">    }</span>
+    
+    public String getProductUnit() {
+<span class="nc" id="L80">        return productUnit;</span>
+    }
+    
+    public void setProductUnit(String productUnit) {
+<span class="nc" id="L84">        this.productUnit = productUnit;</span>
+<span class="nc" id="L85">    }</span>
+    
+    public BigDecimal getQuantity() {
+<span class="nc" id="L88">        return quantity;</span>
+    }
+    
+    public void setQuantity(BigDecimal quantity) {
+<span class="nc" id="L92">        this.quantity = quantity;</span>
+<span class="nc" id="L93">        calculateTotalPrice();</span>
+<span class="nc" id="L94">    }</span>
+    
+    public BigDecimal getUnitPrice() {
+<span class="nc" id="L97">        return unitPrice;</span>
+    }
+    
+    public void setUnitPrice(BigDecimal unitPrice) {
+<span class="nc" id="L101">        this.unitPrice = unitPrice;</span>
+<span class="nc" id="L102">        calculateTotalPrice();</span>
+<span class="nc" id="L103">    }</span>
+    
+    public BigDecimal getTotalPrice() {
+<span class="nc" id="L106">        return totalPrice;</span>
+    }
+    
+    public void setTotalPrice(BigDecimal totalPrice) {
+<span class="nc" id="L110">        this.totalPrice = totalPrice;</span>
+<span class="nc" id="L111">    }</span>
+    
+    public String getDescription() {
+<span class="nc" id="L114">        return description;</span>
+    }
+    
+    public void setDescription(String description) {
+<span class="nc" id="L118">        this.description = description;</span>
+<span class="nc" id="L119">    }</span>
+    
+    // Utility method
+    private void calculateTotalPrice() {
+<span class="nc bnc" id="L123" title="All 4 branches missed.">        if (quantity != null &amp;&amp; unitPrice != null) {</span>
+<span class="nc" id="L124">            this.totalPrice = unitPrice.multiply(quantity);</span>
+        }
+<span class="nc" id="L126">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

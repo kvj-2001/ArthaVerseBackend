@@ -1,0 +1,193 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>PdfService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">billing-backend</a> &gt; <a href="index.source.html" class="el_package">com.billing.service</a> &gt; <span class="el_source">PdfService.java</span></div><h1>PdfService.java</h1><pre class="source lang-java linenums">package com.billing.service;
+
+import com.billing.entity.Invoice;
+import com.billing.entity.InvoiceItem;
+import com.billing.entity.Product;
+import com.itextpdf.text.*;
+import com.itextpdf.text.pdf.PdfPCell;
+import com.itextpdf.text.pdf.PdfPTable;
+import com.itextpdf.text.pdf.PdfWriter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
+
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.math.BigDecimal;
+import java.time.format.DateTimeFormatter;
+
+@Service
+<span class="nc" id="L20">public class PdfService {</span>
+    
+<span class="nc" id="L22">    private static final Logger logger = LoggerFactory.getLogger(PdfService.class);</span>
+    
+    public byte[] generateInvoicePdf(Invoice invoice) throws DocumentException, IOException {
+<span class="nc" id="L25">        Document document = new Document(PageSize.A4);</span>
+<span class="nc" id="L26">        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();</span>
+        
+<span class="nc" id="L28">        PdfWriter.getInstance(document, outputStream);</span>
+<span class="nc" id="L29">        document.open();</span>
+        
+        // Company header
+<span class="nc" id="L32">        Font titleFont = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 18, BaseColor.BLACK);</span>
+<span class="nc" id="L33">        Font headerFont = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 12, BaseColor.BLACK);</span>
+<span class="nc" id="L34">        Font normalFont = FontFactory.getFont(FontFactory.HELVETICA, 10, BaseColor.BLACK);</span>
+        
+        // Title
+<span class="nc" id="L37">        Paragraph title = new Paragraph(&quot;INVOICE&quot;, titleFont);</span>
+<span class="nc" id="L38">        title.setAlignment(Element.ALIGN_CENTER);</span>
+<span class="nc" id="L39">        document.add(title);</span>
+<span class="nc" id="L40">        document.add(new Paragraph(&quot; &quot;));</span>
+        
+        // Invoice details table
+<span class="nc" id="L43">        PdfPTable headerTable = new PdfPTable(2);</span>
+<span class="nc" id="L44">        headerTable.setWidthPercentage(100);</span>
+<span class="nc" id="L45">        headerTable.setWidths(new float[]{1, 1});</span>
+        
+        // Left side - Company info
+<span class="nc" id="L48">        PdfPCell leftCell = new PdfPCell();</span>
+<span class="nc" id="L49">        leftCell.setBorder(Rectangle.NO_BORDER);</span>
+<span class="nc" id="L50">        leftCell.addElement(new Paragraph(&quot;BEST FOOD AT LOW PRICES&quot;, headerFont));</span>
+<span class="nc" id="L51">        leftCell.addElement(new Paragraph(&quot;Krishna Nagar Main Road&quot;, normalFont));</span>
+<span class="nc" id="L52">        leftCell.addElement(new Paragraph(&quot;Guntur A.P. 522006&quot;, normalFont));</span>
+<span class="nc" id="L53">        leftCell.addElement(new Paragraph(&quot;Phone: +91-9440262688&quot;, normalFont));</span>
+<span class="nc" id="L54">        leftCell.addElement(new Paragraph(&quot;Email: info@billingcompany.com&quot;, normalFont));</span>
+        
+        // Right side - Invoice info
+<span class="nc" id="L57">        PdfPCell rightCell = new PdfPCell();</span>
+<span class="nc" id="L58">        rightCell.setBorder(Rectangle.NO_BORDER);</span>
+<span class="nc" id="L59">        rightCell.setHorizontalAlignment(Element.ALIGN_RIGHT);</span>
+<span class="nc" id="L60">        rightCell.addElement(new Paragraph(&quot;Invoice #: &quot; + invoice.getInvoiceNumber(), headerFont));</span>
+<span class="nc" id="L61">        rightCell.addElement(new Paragraph(&quot;Invoice Date: &quot; + invoice.getInvoiceDate().format(DateTimeFormatter.ofPattern(&quot;MM/dd/yyyy&quot;)), normalFont));</span>
+<span class="nc bnc" id="L62" title="All 2 branches missed.">        if (invoice.getDueDate() != null) {</span>
+<span class="nc" id="L63">            rightCell.addElement(new Paragraph(&quot;Due Date: &quot; + invoice.getDueDate().format(DateTimeFormatter.ofPattern(&quot;MM/dd/yyyy&quot;)), normalFont));</span>
+        }
+<span class="nc" id="L65">        rightCell.addElement(new Paragraph(&quot;Status: &quot; + invoice.getStatus().toString(), normalFont));</span>
+        
+<span class="nc" id="L67">        headerTable.addCell(leftCell);</span>
+<span class="nc" id="L68">        headerTable.addCell(rightCell);</span>
+<span class="nc" id="L69">        document.add(headerTable);</span>
+<span class="nc" id="L70">        document.add(new Paragraph(&quot; &quot;));</span>
+        
+        // Customer information
+<span class="nc" id="L73">        document.add(new Paragraph(&quot;Bill To:&quot;, headerFont));</span>
+<span class="nc" id="L74">        document.add(new Paragraph(invoice.getCustomerName(), normalFont));</span>
+<span class="nc bnc" id="L75" title="All 2 branches missed.">        if (invoice.getCustomerEmail() != null) {</span>
+<span class="nc" id="L76">            document.add(new Paragraph(&quot;Email: &quot; + invoice.getCustomerEmail(), normalFont));</span>
+        }
+<span class="nc bnc" id="L78" title="All 2 branches missed.">        if (invoice.getCustomerPhone() != null) {</span>
+<span class="nc" id="L79">            document.add(new Paragraph(&quot;Phone: &quot; + invoice.getCustomerPhone(), normalFont));</span>
+        }
+<span class="nc bnc" id="L81" title="All 2 branches missed.">        if (invoice.getCustomerAddress() != null) {</span>
+<span class="nc" id="L82">            document.add(new Paragraph(&quot;Address: &quot; + invoice.getCustomerAddress(), normalFont));</span>
+        }
+<span class="nc" id="L84">        document.add(new Paragraph(&quot; &quot;));</span>
+        
+        // Items table
+<span class="nc" id="L87">        PdfPTable itemsTable = new PdfPTable(6);</span>
+<span class="nc" id="L88">        itemsTable.setWidthPercentage(100);</span>
+<span class="nc" id="L89">        itemsTable.setWidths(new float[]{3, 1, 1.5f, 1.5f, 2, 2});</span>
+        
+        // Table headers
+<span class="nc" id="L92">        addTableHeader(itemsTable, &quot;Description&quot;, headerFont);</span>
+<span class="nc" id="L93">        addTableHeader(itemsTable, &quot;Qty&quot;, headerFont);</span>
+<span class="nc" id="L94">        addTableHeader(itemsTable, &quot;MRP&quot;, headerFont);</span>
+<span class="nc" id="L95">        addTableHeader(itemsTable, &quot;Price&quot;, headerFont);</span>
+<span class="nc" id="L96">        addTableHeader(itemsTable, &quot;Total&quot;, headerFont);</span>
+<span class="nc" id="L97">        addTableHeader(itemsTable, &quot;Savings&quot;, headerFont);</span>
+        
+        // Table items
+<span class="nc" id="L100">        BigDecimal totalSavings = BigDecimal.ZERO;</span>
+<span class="nc bnc" id="L101" title="All 2 branches missed.">        for (InvoiceItem item : invoice.getItems()) {</span>
+<span class="nc" id="L102">            Product product = item.getProduct();</span>
+<span class="nc bnc" id="L103" title="All 4 branches missed.">            BigDecimal mrp = (product != null &amp;&amp; product.getMrp() != null) ? product.getMrp() : null;</span>
+<span class="nc" id="L104">            BigDecimal savings = BigDecimal.ZERO;</span>
+<span class="nc bnc" id="L105" title="All 4 branches missed.">            if (mrp != null &amp;&amp; mrp.compareTo(item.getUnitPrice()) &gt; 0) {</span>
+<span class="nc" id="L106">                savings = mrp.subtract(item.getUnitPrice()).multiply(item.getQuantity());</span>
+<span class="nc" id="L107">                totalSavings = totalSavings.add(savings);</span>
+            }
+            
+<span class="nc" id="L110">            itemsTable.addCell(new PdfPCell(new Phrase(item.getDescription(), normalFont)));</span>
+<span class="nc" id="L111">            itemsTable.addCell(new PdfPCell(new Phrase(item.getQuantity().toString(), normalFont)));</span>
+<span class="nc bnc" id="L112" title="All 2 branches missed.">            itemsTable.addCell(new PdfPCell(new Phrase(mrp != null ? &quot;₹&quot; + mrp.toString() : &quot;-&quot;, normalFont)));</span>
+<span class="nc" id="L113">            itemsTable.addCell(new PdfPCell(new Phrase(&quot;₹&quot; + item.getUnitPrice().toString(), normalFont)));</span>
+<span class="nc" id="L114">            itemsTable.addCell(new PdfPCell(new Phrase(&quot;₹&quot; + item.getTotalPrice().toString(), normalFont)));</span>
+            
+<span class="nc" id="L116">            PdfPCell savingsCell = new PdfPCell(new Phrase(</span>
+<span class="nc bnc" id="L117" title="All 2 branches missed.">                savings.compareTo(BigDecimal.ZERO) &gt; 0 ? &quot;₹&quot; + savings.setScale(2, BigDecimal.ROUND_HALF_UP).toString() : &quot;-&quot;, </span>
+                normalFont
+            ));
+<span class="nc bnc" id="L120" title="All 2 branches missed.">            if (savings.compareTo(BigDecimal.ZERO) &gt; 0) {</span>
+<span class="nc" id="L121">                savingsCell.setBackgroundColor(new BaseColor(230, 255, 230));</span>
+            }
+<span class="nc" id="L123">            itemsTable.addCell(savingsCell);</span>
+<span class="nc" id="L124">        }</span>
+        
+<span class="nc" id="L126">        document.add(itemsTable);</span>
+<span class="nc" id="L127">        document.add(new Paragraph(&quot; &quot;));</span>
+        
+        // Totals table
+<span class="nc" id="L130">        PdfPTable totalsTable = new PdfPTable(2);</span>
+<span class="nc" id="L131">        totalsTable.setWidthPercentage(50);</span>
+<span class="nc" id="L132">        totalsTable.setHorizontalAlignment(Element.ALIGN_RIGHT);</span>
+        
+<span class="nc" id="L134">        addTotalRow(totalsTable, &quot;Subtotal:&quot;, &quot;₹&quot; + invoice.getSubtotal().toString(), normalFont, headerFont);</span>
+<span class="nc bnc" id="L135" title="All 2 branches missed.">        if (totalSavings.compareTo(BigDecimal.ZERO) &gt; 0) {</span>
+<span class="nc" id="L136">            Font savingsFont = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 12, BaseColor.GREEN);</span>
+<span class="nc" id="L137">            addTotalRow(totalsTable, &quot;You Saved:&quot;, &quot;₹&quot; + totalSavings.setScale(2, BigDecimal.ROUND_HALF_UP).toString(), savingsFont, savingsFont);</span>
+        }
+<span class="nc bnc" id="L139" title="All 2 branches missed.">        if (invoice.getDiscountAmount().compareTo(BigDecimal.ZERO) &gt; 0) {</span>
+<span class="nc" id="L140">            addTotalRow(totalsTable, &quot;Discount:&quot;, &quot;-₹&quot; + invoice.getDiscountAmount().toString(), normalFont, headerFont);</span>
+        }
+<span class="nc bnc" id="L142" title="All 2 branches missed.">        if (invoice.getTaxAmount().compareTo(BigDecimal.ZERO) &gt; 0) {</span>
+<span class="nc" id="L143">            addTotalRow(totalsTable, &quot;Tax:&quot;, &quot;₹&quot; + invoice.getTaxAmount().toString(), normalFont, headerFont);</span>
+        }
+<span class="nc" id="L145">        addTotalRow(totalsTable, &quot;Total:&quot;, &quot;₹&quot; + invoice.getTotalAmount().toString(), headerFont, headerFont);</span>
+        
+<span class="nc" id="L147">        document.add(totalsTable);</span>
+        
+        // Notes
+<span class="nc bnc" id="L150" title="All 4 branches missed.">        if (invoice.getNotes() != null &amp;&amp; !invoice.getNotes().isEmpty()) {</span>
+<span class="nc" id="L151">            document.add(new Paragraph(&quot; &quot;));</span>
+<span class="nc" id="L152">            document.add(new Paragraph(&quot;Notes:&quot;, headerFont));</span>
+<span class="nc" id="L153">            document.add(new Paragraph(invoice.getNotes(), normalFont));</span>
+        }
+        
+        // Footer
+<span class="nc" id="L157">        document.add(new Paragraph(&quot; &quot;));</span>
+<span class="nc" id="L158">        document.add(new Paragraph(&quot; &quot;));</span>
+<span class="nc" id="L159">        Paragraph footer = new Paragraph(&quot;Thank you for your business!&quot;, normalFont);</span>
+<span class="nc" id="L160">        footer.setAlignment(Element.ALIGN_CENTER);</span>
+<span class="nc" id="L161">        document.add(footer);</span>
+        
+<span class="nc" id="L163">        document.close();</span>
+        
+<span class="nc" id="L165">        logger.info(&quot;PDF generated for invoice: {}&quot;, invoice.getInvoiceNumber());</span>
+        
+<span class="nc" id="L167">        return outputStream.toByteArray();</span>
+    }
+    
+    private void addTableHeader(PdfPTable table, String text, Font font) {
+<span class="nc" id="L171">        PdfPCell cell = new PdfPCell(new Phrase(text, font));</span>
+<span class="nc" id="L172">        cell.setBackgroundColor(BaseColor.LIGHT_GRAY);</span>
+<span class="nc" id="L173">        cell.setHorizontalAlignment(Element.ALIGN_CENTER);</span>
+<span class="nc" id="L174">        cell.setPadding(5);</span>
+<span class="nc" id="L175">        table.addCell(cell);</span>
+<span class="nc" id="L176">    }</span>
+    
+    private void addTotalRow(PdfPTable table, String label, String value, Font labelFont, Font valueFont) {
+<span class="nc" id="L179">        PdfPCell labelCell = new PdfPCell(new Phrase(label, labelFont));</span>
+<span class="nc" id="L180">        labelCell.setBorder(Rectangle.NO_BORDER);</span>
+<span class="nc" id="L181">        labelCell.setHorizontalAlignment(Element.ALIGN_RIGHT);</span>
+<span class="nc" id="L182">        labelCell.setPadding(5);</span>
+        
+<span class="nc" id="L184">        PdfPCell valueCell = new PdfPCell(new Phrase(value, valueFont));</span>
+<span class="nc" id="L185">        valueCell.setBorder(Rectangle.NO_BORDER);</span>
+<span class="nc" id="L186">        valueCell.setHorizontalAlignment(Element.ALIGN_RIGHT);</span>
+<span class="nc" id="L187">        valueCell.setPadding(5);</span>
+        
+<span class="nc" id="L189">        table.addCell(labelCell);</span>
+<span class="nc" id="L190">        table.addCell(valueCell);</span>
+<span class="nc" id="L191">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

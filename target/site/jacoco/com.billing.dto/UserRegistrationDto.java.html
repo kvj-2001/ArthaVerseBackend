@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>UserRegistrationDto.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">billing-backend</a> &gt; <a href="index.source.html" class="el_package">com.billing.dto</a> &gt; <span class="el_source">UserRegistrationDto.java</span></div><h1>UserRegistrationDto.java</h1><pre class="source lang-java linenums">package com.billing.dto;
+
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
+
+public class UserRegistrationDto {
+    
+    @NotBlank(message = &quot;Username is required&quot;)
+    @Size(min = 3, max = 50, message = &quot;Username must be between 3 and 50 characters&quot;)
+    private String username;
+    
+    @NotBlank(message = &quot;Email is required&quot;)
+    @Email(message = &quot;Email should be valid&quot;)
+    private String email;
+    
+    @NotBlank(message = &quot;Password is required&quot;)
+    @Size(min = 6, message = &quot;Password must be at least 6 characters&quot;)
+    private String password;
+    
+    @NotBlank(message = &quot;First name is required&quot;)
+    private String firstName;
+    
+    @NotBlank(message = &quot;Last name is required&quot;)
+    private String lastName;
+    
+    private String phoneNumber;
+    
+    private String role; // For admin user creation
+    
+    private Boolean enabled; // For admin user management
+    
+    // Constructors
+<span class="fc" id="L34">    public UserRegistrationDto() {}</span>
+    
+<span class="nc" id="L36">    public UserRegistrationDto(String username, String email, String password, String firstName, String lastName) {</span>
+<span class="nc" id="L37">        this.username = username;</span>
+<span class="nc" id="L38">        this.email = email;</span>
+<span class="nc" id="L39">        this.password = password;</span>
+<span class="nc" id="L40">        this.firstName = firstName;</span>
+<span class="nc" id="L41">        this.lastName = lastName;</span>
+<span class="nc" id="L42">    }</span>
+    
+    // Getters and Setters
+    public String getUsername() {
+<span class="fc" id="L46">        return username;</span>
+    }
+    
+    public void setUsername(String username) {
+<span class="fc" id="L50">        this.username = username;</span>
+<span class="fc" id="L51">    }</span>
+    
+    public String getEmail() {
+<span class="fc" id="L54">        return email;</span>
+    }
+    
+    public void setEmail(String email) {
+<span class="fc" id="L58">        this.email = email;</span>
+<span class="fc" id="L59">    }</span>
+    
+    public String getPassword() {
+<span class="fc" id="L62">        return password;</span>
+    }
+    
+    public void setPassword(String password) {
+<span class="fc" id="L66">        this.password = password;</span>
+<span class="fc" id="L67">    }</span>
+    
+    public String getFirstName() {
+<span class="fc" id="L70">        return firstName;</span>
+    }
+    
+    public void setFirstName(String firstName) {
+<span class="fc" id="L74">        this.firstName = firstName;</span>
+<span class="fc" id="L75">    }</span>
+    
+    public String getLastName() {
+<span class="fc" id="L78">        return lastName;</span>
+    }
+    
+    public void setLastName(String lastName) {
+<span class="fc" id="L82">        this.lastName = lastName;</span>
+<span class="fc" id="L83">    }</span>
+    
+    public String getPhoneNumber() {
+<span class="fc" id="L86">        return phoneNumber;</span>
+    }
+    
+    public void setPhoneNumber(String phoneNumber) {
+<span class="nc" id="L90">        this.phoneNumber = phoneNumber;</span>
+<span class="nc" id="L91">    }</span>
+    
+    public String getRole() {
+<span class="nc" id="L94">        return role;</span>
+    }
+    
+    public void setRole(String role) {
+<span class="nc" id="L98">        this.role = role;</span>
+<span class="nc" id="L99">    }</span>
+    
+    public Boolean getEnabled() {
+<span class="nc" id="L102">        return enabled;</span>
+    }
+    
+    public void setEnabled(Boolean enabled) {
+<span class="nc" id="L106">        this.enabled = enabled;</span>
+<span class="nc" id="L107">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

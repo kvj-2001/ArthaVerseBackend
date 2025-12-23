@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>DataInitializer.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">billing-backend</a> &gt; <a href="index.source.html" class="el_package">com.billing.config</a> &gt; <span class="el_source">DataInitializer.java</span></div><h1>DataInitializer.java</h1><pre class="source lang-java linenums">package com.billing.config;
+
+import com.billing.entity.User;
+import com.billing.repository.UserRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.CommandLineRunner;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Component;
+
+@Component
+<span class="nc" id="L13">public class DataInitializer implements CommandLineRunner {</span>
+    
+<span class="nc" id="L15">    private static final Logger logger = LoggerFactory.getLogger(DataInitializer.class);</span>
+    
+    @Autowired
+    private UserRepository userRepository;
+    
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+    
+    @Override
+    public void run(String... args) throws Exception {
+<span class="nc" id="L25">        createDefaultAdminUser();</span>
+<span class="nc" id="L26">    }</span>
+    
+    private void createDefaultAdminUser() {
+        // Check if admin user already exists
+<span class="nc bnc" id="L30" title="All 2 branches missed.">        if (!userRepository.existsByUsername(&quot;admin&quot;)) {</span>
+<span class="nc" id="L31">            User adminUser = new User();</span>
+<span class="nc" id="L32">            adminUser.setUsername(&quot;admin&quot;);</span>
+<span class="nc" id="L33">            adminUser.setEmail(&quot;admin@billing.app&quot;);</span>
+<span class="nc" id="L34">            adminUser.setPassword(passwordEncoder.encode(&quot;admin123&quot;));</span>
+<span class="nc" id="L35">            adminUser.setFirstName(&quot;System&quot;);</span>
+<span class="nc" id="L36">            adminUser.setLastName(&quot;Administrator&quot;);</span>
+<span class="nc" id="L37">            adminUser.setRole(User.Role.ADMIN);</span>
+<span class="nc" id="L38">            adminUser.setStatus(User.UserStatus.APPROVED);</span>
+<span class="nc" id="L39">            adminUser.setEmailVerified(true);</span>
+            
+<span class="nc" id="L41">            userRepository.save(adminUser);</span>
+<span class="nc" id="L42">            logger.info(&quot;Default admin user created successfully with username: admin&quot;);</span>
+<span class="nc" id="L43">        } else {</span>
+            // Update existing admin user to ensure it's enabled
+<span class="nc" id="L45">            User existingAdmin = userRepository.findByUsername(&quot;admin&quot;).orElse(null);</span>
+<span class="nc bnc" id="L46" title="All 4 branches missed.">            if (existingAdmin != null &amp;&amp; existingAdmin.getStatus() != User.UserStatus.APPROVED) {</span>
+<span class="nc" id="L47">                existingAdmin.setStatus(User.UserStatus.APPROVED);</span>
+<span class="nc" id="L48">                existingAdmin.setEmailVerified(true);</span>
+<span class="nc" id="L49">                userRepository.save(existingAdmin);</span>
+<span class="nc" id="L50">                logger.info(&quot;Updated existing admin user status to APPROVED&quot;);</span>
+            } else {
+<span class="nc" id="L52">                logger.info(&quot;Default admin user already exists and is properly configured&quot;);</span>
+            }
+        }
+<span class="nc" id="L55">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

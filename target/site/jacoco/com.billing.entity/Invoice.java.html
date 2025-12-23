@@ -1,0 +1,256 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Invoice.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">billing-backend</a> &gt; <a href="index.source.html" class="el_package">com.billing.entity</a> &gt; <span class="el_source">Invoice.java</span></div><h1>Invoice.java</h1><pre class="source lang-java linenums">package com.billing.entity;
+
+import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+
+@Entity
+@Table(name = &quot;invoices&quot;)
+@EntityListeners(AuditingEntityListener.class)
+public class Invoice {
+    
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+    
+    @NotBlank
+    @Column(unique = true)
+    private String invoiceNumber;
+    
+    @NotNull
+    private LocalDate invoiceDate;
+    
+    private LocalDate dueDate;
+    
+    private String customerName;
+    
+    private String customerEmail;
+    
+    private String customerPhone;
+    
+    @Column(columnDefinition = &quot;TEXT&quot;)
+    private String customerAddress;
+    
+<span class="nc" id="L43">    @NotNull</span>
+    private BigDecimal subtotal = BigDecimal.ZERO;
+    
+<span class="nc" id="L46">    @NotNull</span>
+    private BigDecimal taxAmount = BigDecimal.ZERO;
+    
+<span class="nc" id="L49">    @NotNull</span>
+    private BigDecimal discountAmount = BigDecimal.ZERO;
+    
+<span class="nc" id="L52">    @NotNull</span>
+    private BigDecimal totalAmount = BigDecimal.ZERO;
+    
+<span class="nc" id="L55">    @Enumerated(EnumType.STRING)</span>
+    private InvoiceStatus status = InvoiceStatus.DRAFT;
+    
+    @Column(columnDefinition = &quot;TEXT&quot;)
+    private String notes;
+    
+    @NotNull
+    private Long userId;
+    
+<span class="nc" id="L64">    @OneToMany(mappedBy = &quot;invoice&quot;, cascade = CascadeType.ALL, fetch = FetchType.LAZY)</span>
+    private List&lt;InvoiceItem&gt; items = new ArrayList&lt;&gt;();
+    
+    @CreatedDate
+    @Column(name = &quot;created_at&quot;)
+    private LocalDateTime createdAt;
+    
+    @LastModifiedDate
+    @Column(name = &quot;updated_at&quot;)
+    private LocalDateTime updatedAt;
+    
+    // Constructors
+<span class="nc" id="L76">    public Invoice() {}</span>
+    
+<span class="nc" id="L78">    public Invoice(String invoiceNumber, LocalDate invoiceDate, String customerName, Long userId) {</span>
+<span class="nc" id="L79">        this.invoiceNumber = invoiceNumber;</span>
+<span class="nc" id="L80">        this.invoiceDate = invoiceDate;</span>
+<span class="nc" id="L81">        this.customerName = customerName;</span>
+<span class="nc" id="L82">        this.userId = userId;</span>
+<span class="nc" id="L83">    }</span>
+    
+    // Getters and Setters
+    public Long getId() {
+<span class="nc" id="L87">        return id;</span>
+    }
+    
+    public void setId(Long id) {
+<span class="nc" id="L91">        this.id = id;</span>
+<span class="nc" id="L92">    }</span>
+    
+    public String getInvoiceNumber() {
+<span class="nc" id="L95">        return invoiceNumber;</span>
+    }
+    
+    public void setInvoiceNumber(String invoiceNumber) {
+<span class="nc" id="L99">        this.invoiceNumber = invoiceNumber;</span>
+<span class="nc" id="L100">    }</span>
+    
+    public LocalDate getInvoiceDate() {
+<span class="nc" id="L103">        return invoiceDate;</span>
+    }
+    
+    public void setInvoiceDate(LocalDate invoiceDate) {
+<span class="nc" id="L107">        this.invoiceDate = invoiceDate;</span>
+<span class="nc" id="L108">    }</span>
+    
+    public LocalDate getDueDate() {
+<span class="nc" id="L111">        return dueDate;</span>
+    }
+    
+    public void setDueDate(LocalDate dueDate) {
+<span class="nc" id="L115">        this.dueDate = dueDate;</span>
+<span class="nc" id="L116">    }</span>
+    
+    public String getCustomerName() {
+<span class="nc" id="L119">        return customerName;</span>
+    }
+    
+    public void setCustomerName(String customerName) {
+<span class="nc" id="L123">        this.customerName = customerName;</span>
+<span class="nc" id="L124">    }</span>
+    
+    public String getCustomerEmail() {
+<span class="nc" id="L127">        return customerEmail;</span>
+    }
+    
+    public void setCustomerEmail(String customerEmail) {
+<span class="nc" id="L131">        this.customerEmail = customerEmail;</span>
+<span class="nc" id="L132">    }</span>
+    
+    public String getCustomerPhone() {
+<span class="nc" id="L135">        return customerPhone;</span>
+    }
+    
+    public void setCustomerPhone(String customerPhone) {
+<span class="nc" id="L139">        this.customerPhone = customerPhone;</span>
+<span class="nc" id="L140">    }</span>
+    
+    public String getCustomerAddress() {
+<span class="nc" id="L143">        return customerAddress;</span>
+    }
+    
+    public void setCustomerAddress(String customerAddress) {
+<span class="nc" id="L147">        this.customerAddress = customerAddress;</span>
+<span class="nc" id="L148">    }</span>
+    
+    public BigDecimal getSubtotal() {
+<span class="nc" id="L151">        return subtotal;</span>
+    }
+    
+    public void setSubtotal(BigDecimal subtotal) {
+<span class="nc" id="L155">        this.subtotal = subtotal;</span>
+<span class="nc" id="L156">    }</span>
+    
+    public BigDecimal getTaxAmount() {
+<span class="nc" id="L159">        return taxAmount;</span>
+    }
+    
+    public void setTaxAmount(BigDecimal taxAmount) {
+<span class="nc" id="L163">        this.taxAmount = taxAmount;</span>
+<span class="nc" id="L164">    }</span>
+    
+    public BigDecimal getDiscountAmount() {
+<span class="nc" id="L167">        return discountAmount;</span>
+    }
+    
+    public void setDiscountAmount(BigDecimal discountAmount) {
+<span class="nc" id="L171">        this.discountAmount = discountAmount;</span>
+<span class="nc" id="L172">    }</span>
+    
+    public BigDecimal getTotalAmount() {
+<span class="nc" id="L175">        return totalAmount;</span>
+    }
+    
+    public void setTotalAmount(BigDecimal totalAmount) {
+<span class="nc" id="L179">        this.totalAmount = totalAmount;</span>
+<span class="nc" id="L180">    }</span>
+    
+    public InvoiceStatus getStatus() {
+<span class="nc" id="L183">        return status;</span>
+    }
+    
+    public void setStatus(InvoiceStatus status) {
+<span class="nc" id="L187">        this.status = status;</span>
+<span class="nc" id="L188">    }</span>
+    
+    public String getNotes() {
+<span class="nc" id="L191">        return notes;</span>
+    }
+    
+    public void setNotes(String notes) {
+<span class="nc" id="L195">        this.notes = notes;</span>
+<span class="nc" id="L196">    }</span>
+    
+    public Long getUserId() {
+<span class="nc" id="L199">        return userId;</span>
+    }
+    
+    public void setUserId(Long userId) {
+<span class="nc" id="L203">        this.userId = userId;</span>
+<span class="nc" id="L204">    }</span>
+    
+    public List&lt;InvoiceItem&gt; getItems() {
+<span class="nc" id="L207">        return items;</span>
+    }
+    
+    public void setItems(List&lt;InvoiceItem&gt; items) {
+<span class="nc" id="L211">        this.items = items;</span>
+<span class="nc" id="L212">    }</span>
+    
+    public LocalDateTime getCreatedAt() {
+<span class="nc" id="L215">        return createdAt;</span>
+    }
+    
+    public void setCreatedAt(LocalDateTime createdAt) {
+<span class="nc" id="L219">        this.createdAt = createdAt;</span>
+<span class="nc" id="L220">    }</span>
+    
+    public LocalDateTime getUpdatedAt() {
+<span class="nc" id="L223">        return updatedAt;</span>
+    }
+    
+    public void setUpdatedAt(LocalDateTime updatedAt) {
+<span class="nc" id="L227">        this.updatedAt = updatedAt;</span>
+<span class="nc" id="L228">    }</span>
+    
+    // Utility methods
+    public void addItem(InvoiceItem item) {
+<span class="nc" id="L232">        items.add(item);</span>
+<span class="nc" id="L233">        item.setInvoice(this);</span>
+<span class="nc" id="L234">        calculateTotals();</span>
+<span class="nc" id="L235">    }</span>
+    
+    public void removeItem(InvoiceItem item) {
+<span class="nc" id="L238">        items.remove(item);</span>
+<span class="nc" id="L239">        item.setInvoice(null);</span>
+<span class="nc" id="L240">        calculateTotals();</span>
+<span class="nc" id="L241">    }</span>
+    
+    public void calculateTotals() {
+<span class="nc" id="L244">        subtotal = items.stream()</span>
+<span class="nc" id="L245">                .map(InvoiceItem::getTotalPrice)</span>
+<span class="nc" id="L246">                .reduce(BigDecimal.ZERO, BigDecimal::add);</span>
+        
+<span class="nc" id="L248">        totalAmount = subtotal.add(taxAmount).subtract(discountAmount);</span>
+<span class="nc" id="L249">    }</span>
+    
+    // Enums
+<span class="nc" id="L252">    public enum InvoiceStatus {</span>
+<span class="nc" id="L253">        DRAFT, SENT, PAID, OVERDUE, CANCELLED</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>
