@@ -50,6 +50,7 @@ A full-featured billing application built with Spring Boot, featuring user manag
 - **CSV Processing**: Apache Commons CSV
 - **Testing**: JUnit 5, Mockito, H2 Database
 - **Build Tool**: Maven
+- **Deployed At**: Railway.com
 
 ## Prerequisites
 
@@ -328,3 +329,4 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 ## Support
 
 For support, email support@billing-app.com or create an issue in the repository.
+
