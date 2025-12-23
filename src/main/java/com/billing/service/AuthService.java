@@ -81,43 +81,23 @@ public class AuthService {
     }
     
     public JwtResponseDto authenticateUser(LoginDto loginDto) {
-        long start = System.currentTimeMillis();
-        try {
-            Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(
-                    loginDto.getUsername(),
-                    loginDto.getPassword()
-                )
-            );
-            long afterAuth = System.currentTimeMillis();
-            logger.debug("AuthenticationManager.authenticate duration: {} ms", (afterAuth - start));
-
-            SecurityContextHolder.getContext().setAuthentication(authentication);
-            long afterSetAuth = System.currentTimeMillis();
-            logger.debug("SecurityContext set duration: {} ms", (afterSetAuth - afterAuth));
-
-            String jwt = tokenProvider.generateToken(loginDto.getUsername());
-            long afterToken = System.currentTimeMillis();
-            logger.debug("Token generation duration: {} ms", (afterToken - afterSetAuth));
-
-            User user = userRepository.findByUsername(loginDto.getUsername())
-                .orElseThrow(() -> new ResourceNotFoundException("User", "username", loginDto.getUsername()));
-            long afterUserFetch = System.currentTimeMillis();
-            logger.debug("User fetch duration: {} ms", (afterUserFetch - afterToken));
-
-            UserResponseDto userResponse = new UserResponseDto(user);
-
-            logger.info("User authenticated: {} (total {} ms)", loginDto.getUsername(), (afterUserFetch - start));
-            return new JwtResponseDto(jwt, userResponse);
-        } catch (org.springframework.security.authentication.BadCredentialsException ex) {
-            long duration = System.currentTimeMillis() - start;
-            logger.warn("Authentication failed for user {} after {} ms: {}", loginDto.getUsername(), duration, ex.getMessage());
-            throw ex;
-        } catch (Exception ex) {
-            long duration = System.currentTimeMillis() - start;
-            logger.error("Error during authentication for user {} after {} ms", loginDto.getUsername(), duration, ex);
-            throw ex;
-        }
+        Authentication authentication = authenticationManager.authenticate(
+            new UsernamePasswordAuthenticationToken(
+                loginDto.getUsername(),
+                loginDto.getPassword()
+            )
+        );
+        
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+        
+        String jwt = tokenProvider.generateToken(loginDto.getUsername());
+        
+        User user = userRepository.findByUsername(loginDto.getUsername())
+            .orElseThrow(() -> new ResourceNotFoundException("User", "username", loginDto.getUsername()));
+        
+        UserResponseDto userResponse = new UserResponseDto(user);
+        
+        return new JwtResponseDto(jwt, userResponse);
     }
     
     public UserResponseDto verifyEmail(String token) {
