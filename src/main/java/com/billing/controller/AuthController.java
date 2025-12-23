@@ -8,6 +8,7 @@ import com.billing.dto.UserResponseDto;
 import com.billing.service.AuthService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -18,6 +19,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
+@CrossOrigin(origins = {"https://arthaverse.vercel.app", "http://localhost:3000"})
 @RequestMapping("/auth")
 @Tag(name = "Authentication", description = "Authentication and user management endpoints")
 public class AuthController {
