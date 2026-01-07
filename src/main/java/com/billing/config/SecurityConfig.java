@@ -86,7 +86,7 @@ public class SecurityConfig {
     @Bean
     public FilterRegistrationBean<CorsFilter> corsFilterRegistration() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOriginPatterns(Arrays.asList("https://arthaverse.vercel.app","http://localhost:3000","https://arthaversebackend-production.up.railway.app"));
+        configuration.setAllowedOriginPatterns(Arrays.asList("https://arthaverse.vercel.app","http://localhost:3000","https://arthaversebackend.onrender.com"));
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(Arrays.asList("*"));
         configuration.setAllowCredentials(true);
@@ -99,3 +99,4 @@ public class SecurityConfig {
         return bean;
     }
 }
+
